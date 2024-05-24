@@ -1,5 +1,5 @@
 #include "Tank.h"
-#include "Raylib.h"
+#include "raylib.h"
 
 Tank::Tank() {
     size = 0;
@@ -12,10 +12,10 @@ Tank::Tank() {
     active = true;
 }
 
-Tank::Tank(MathClasses::Vector3 pos, float rot, float size) {
-    setPos(pos);
-    setRot(rot);
-    this->size = size;
+Tank::Tank(MathClasses::Vector3 _pos, float _rot, float _size) {
+    setPos(_pos);
+    setRot(_rot);
+    size = _size;
     speed = 0;
     vel = { 0, 0, 0 };
 
@@ -26,7 +26,6 @@ Tank::Tank(MathClasses::Vector3 pos, float rot, float size) {
 }
 
 Tank::Tank(const Tank& copy) {
-    //setParent(copy.getParent());
     setPos(copy.getPos());
     setRot(copy.getRot());
     size = copy.size;
@@ -34,12 +33,12 @@ Tank::Tank(const Tank& copy) {
     vel = copy.vel;
 
     turret = copy.turret;
+    turret.setParent(this);
 
     active = copy.active;
 }
 
 Tank& Tank::operator=(const Tank& copy) {
-    //setParent(copy.getParent());
     setPos(copy.getPos());
     setRot(copy.getRot());
     size = copy.size;
@@ -47,6 +46,7 @@ Tank& Tank::operator=(const Tank& copy) {
     vel = copy.vel;
 
     turret = copy.turret;
+    turret.setParent(this);
 
     active = copy.active;
 
@@ -61,12 +61,20 @@ Turret& Tank::getTurret() {
     return turret;
 }
 
+bool Tank::isWithinBounds(MathClasses::Vector3 vec) {
+    return (vec - getWorldPos()).Magnitude() <= size;
+}
+
+bool Tank::isActive() {
+    return active;
+}
+
 void Tank::destroy() {
     active = false;
 }
 
-void Tank::setSpeed(float speed) {
-    this->speed = speed;
+void Tank::setSpeed(float newSpeed) {
+    speed = newSpeed;
 }
 
 void Tank::steer(float radians) {
@@ -84,8 +92,6 @@ void Tank::update() {
 
     vel = getUnitDir() * speed;
     move(vel);
-
-    turret.update();
 }
 
 void Tank::draw() {
@@ -100,10 +106,10 @@ void Tank::draw() {
 
     DrawCircle(pos.x, pos.y, size, GREEN);
     MathClasses::Vector3 corners[4] = {
-        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-acos(-1) / 4) * dir * size * 1.3)),
-        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(acos(-1) / 4) * dir * size * 1.3)),
-        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(acos(-1) * 0.75) * dir * size * 1.3)),
-        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-acos(-1) * 0.75) * dir * size * 1.3))
+        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-MathClasses::pi / 4) * dir * size * 1.3)),
+        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(MathClasses::pi / 4) * dir * size * 1.3)),
+        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(MathClasses::pi * 0.75) * dir * size * 1.3)),
+        MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-MathClasses::pi * 0.75) * dir * size * 1.3))
     };
 
     DrawLineEx({ corners[0].x, corners[0].y }, { corners[3].x, corners[3].y }, 8.f, DARKGREEN);

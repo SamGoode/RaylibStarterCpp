@@ -5,13 +5,10 @@ class Turret : public GameObject {
 private:
     float length;
 
-    //temp solution for implementing firing
-    bool firing;
-
 public:
     Turret();
 
-    Turret(MathClasses::Vector3 pos, float rot, float length);
+    Turret(MathClasses::Vector3 _pos, float _rot, float _length);
 
     Turret(const Turret& copy);
 
@@ -21,11 +18,7 @@ public:
 
     void fire();
 
-    bool isFiring();
-
     void turn(float radians);
-
-    void update();
 
     void draw();
 };

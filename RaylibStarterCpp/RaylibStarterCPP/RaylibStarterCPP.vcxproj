@@ -172,13 +172,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BitMap.cpp" />
+    <ClCompile Include="BrickMap.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BitMap.h" />
+    <ClInclude Include="BrickMap.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="List.h" />
     <ClInclude Include="MathHeaders\Colour.h" />
     <ClInclude Include="MathHeaders\Matrix3.h" />
     <ClInclude Include="MathHeaders\Matrix4.h" />

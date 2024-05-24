@@ -1,21 +1,31 @@
 #include "GameObject.h"
+#include "Game.h"
 
 GameObject::GameObject() {
+    level = nullptr;
     parent = nullptr;
     pos = { 0, 0, 0 };
     rot = 0;
 }
 
-GameObject::GameObject(MathClasses::Vector3 pos, float rot) {
-    parent = nullptr;
-    this->pos = pos;
-    this->rot = rot;
+Game* GameObject::getLevel() {
+    if (parent) {
+        return parent->getLevel();
+    }
+
+    return level;
 }
 
-GameObject::GameObject(GameObject* parent, MathClasses::Vector3 pos, float rot) {
-    this->parent = parent;
-    this->pos = pos;
-    this->rot = rot;
+const Game* GameObject::getLevel() const {
+    if (parent) {
+        return parent->getLevel();
+    }
+
+    return level;
+}
+
+void GameObject::setLevel(Game* _level) {
+    level = _level;
 }
 
 GameObject* GameObject::getParent() {

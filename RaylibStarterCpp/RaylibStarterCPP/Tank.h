@@ -13,7 +13,7 @@ private:
 public:
     Tank();
 
-    Tank(MathClasses::Vector3 pos, float rot, float size);
+    Tank(MathClasses::Vector3 _pos, float _rot, float _size);
 
     Tank(const Tank& copy);
 
@@ -23,9 +23,13 @@ public:
 
     Turret& getTurret();
 
+    bool isWithinBounds(MathClasses::Vector3 vec);
+
+    bool isActive();
+
     void destroy();
 
-    void setSpeed(float speed);
+    void setSpeed(float newSpeed);
 
     void steer(float radians);
 

@@ -2,6 +2,8 @@
 #include "string"
 
 namespace MathClasses {
+    const float pi = acos(-1);
+
     struct Vector3 {
     public:
         float x, y, z;

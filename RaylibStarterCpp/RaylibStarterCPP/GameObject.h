@@ -4,6 +4,7 @@
 
 class GameObject {
 private:
+    class Game* level;
     GameObject* parent;
 
     //local values
@@ -13,9 +14,11 @@ private:
 public:
     GameObject();
 
-    GameObject(MathClasses::Vector3 pos, float rot);
+    Game* getLevel();
 
-    GameObject(GameObject* parent, MathClasses::Vector3 pos, float rot);
+    const Game* getLevel() const;
+
+    void setLevel(Game* _level);
 
     GameObject* getParent();
 
