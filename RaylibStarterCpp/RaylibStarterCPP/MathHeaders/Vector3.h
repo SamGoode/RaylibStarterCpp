@@ -87,6 +87,14 @@ namespace MathClasses {
             return (float)sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
         }
 
+        void SetMagnitude(float newMag) {
+            Normalise();
+
+            x = x * newMag;
+            y = y * newMag;
+            z = z * newMag;
+        }
+
         void Normalise() {
             float mag = Magnitude();
 
@@ -107,6 +115,17 @@ namespace MathClasses {
             }
 
             return { x / mag, y / mag, z / mag };
+        }
+
+        float Angle2D() {
+            Vector3 unitVec = Normalised();
+
+            if (unitVec.y >= 0) {
+                return (float)acos(unitVec.x);
+            }
+            else {
+                return (float)-acos(unitVec.x);
+            }
         }
 
         operator float*() {

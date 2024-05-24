@@ -172,14 +172,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Tank.cpp" />
+    <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="MathHeaders\Colour.h" />
     <ClInclude Include="MathHeaders\Matrix3.h" />
     <ClInclude Include="MathHeaders\Matrix4.h" />
     <ClInclude Include="MathHeaders\Vector3.h" />
     <ClInclude Include="MathHeaders\Vector4.h" />
+    <ClInclude Include="Tank.h" />
+    <ClInclude Include="Turret.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

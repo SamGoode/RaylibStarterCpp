@@ -21,9 +21,10 @@
 
 #include "MathHeaders/Colour.h"
 #include "MathHeaders/Matrix3.h"
-#include "MathHeaders/Matrix4.h"
 #include "MathHeaders/Vector3.h"
-#include "MathHeaders/Vector4.h"
+#include "GameObject.h"
+#include "Tank.h"
+#include "Turret.h"
 
 #pragma warning( push , 0)
 #include <raylib.h>
@@ -34,236 +35,49 @@
 
 #pragma warning(pop)
 
-class Turret {
-private:
-    float length;
-    float rotation;
-    MathClasses::Vector3 pos;
-
-    //temp solution for implementing firing
-    bool firing;
-
-public:
-    Turret() {
-        length = 0;
-        rotation = 0;
-        pos = { 0, 0, 1 };
-
-        firing = false;
-    }
-
-    Turret(float length, float rotation, MathClasses::Vector3 pos) {
-        this->length = length;
-        this->rotation = rotation;
-        this->pos = pos;
-
-        firing = false;
-    }
-
-    Turret(const Turret& copy) {
-        length = copy.length;
-        rotation = copy.rotation;
-        pos = copy.pos;
-
-        firing = copy.firing;
-    }
-
-    Turret& operator=(const Turret& copy) {
-        length = copy.length;
-        rotation = copy.rotation;
-        pos = copy.pos;
-
-        firing = copy.firing;
-
-        return *this;
-    }
-
-    const MathClasses::Vector3& getPos() const {
-        return pos;
-    }
-
-    const float& getLength() const {
-        return length;
-    }
-
-    MathClasses::Vector3 getDirection() {
-        return MathClasses::Matrix3::MakeRotateZ(rotation) * MathClasses::Vector3(1, 0, 1);
-    }
-
-    void fire() {
-        firing = true;
-    }
-
-    bool isFiring() {
-        return firing;
-    }
-
-    void rotate(float radians) {
-        rotation += radians;
-    }
-
-    void update(MathClasses::Vector3 pos) {
-        this->pos = pos;
-
-        firing = false;
-    }
-
-    void draw() {
-        MathClasses::Vector3 endpoint = MathClasses::Vector3(pos + (getDirection() * length * 1.5));
-        DrawLineEx({ pos.x, pos.y }, { endpoint.x, endpoint.y }, 6.f, DARKGRAY);
-    }
-};
-
-class Tank {
-private:
-    float size;
-    float rotation;
-    float speed;
-    MathClasses::Vector3 pos;
-    MathClasses::Vector3 vel;
-    Turret turret;
-
-public:
-    Tank() {
-        size = 20;
-        rotation = 0;
-        speed = 0;
-        pos = { 0, 0, 1 };
-        vel = { 0, 0, 1 };
-
-        turret = Turret(size, rotation, pos);
-    }
-
-    Tank(MathClasses::Vector3 pos) {
-        size = 20;
-        rotation = 0;
-        speed = 0;
-        this->pos = pos;
-        vel = { 0, 0, 1 };
-
-        turret = Turret(size, rotation, pos);
-    }
-
-    Tank(float rotation, MathClasses::Vector3 pos) {
-        size = 20;
-        this->rotation = rotation;
-        speed = 0;
-        this->pos = pos;
-        vel = { 0, 0, 1 };
-
-        turret = Turret(size, rotation, pos);
-    }
-
-    Tank(const Tank& copy) {
-        size = copy.size;
-        rotation = copy.rotation;
-        speed = copy.speed;
-        pos = copy.pos;
-        vel = copy.vel;
-
-        turret = copy.turret;
-    }
-
-    Tank& operator=(const Tank& copy) {
-        size = copy.size;
-        rotation = copy.rotation;
-        speed = copy.speed;
-        pos = copy.pos;
-        vel = copy.vel;
-
-        turret = copy.turret;
-
-        return *this;
-    }
-
-    const MathClasses::Vector3& getPos() const {
-        return pos;
-    }
-
-    const float& getRotation() const {
-        return rotation;
-    }
-
-    MathClasses::Vector3 getDirection() {
-        return MathClasses::Matrix3::MakeRotateZ(rotation) * MathClasses::Vector3(1, 0, 1);
-    }
-
-    Turret& getTurret() {
-        return turret;
-    }
-
-    void setSpeed(float speed) {
-        this->speed = speed;
-    }
-
-    void steer(float radians) {
-        rotation += radians;
-        turret.rotate(radians);
-    }
-
-    void update() {
-        vel = getDirection() * speed;
-        pos = pos + vel;
-
-        turret.update(pos);
-    }
-
-    void draw() {
-        DrawCircle(pos.x, pos.y, size, GREEN);
-        MathClasses::Vector3 corners[4] = {
-            MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-acos(-1) / 4) * getDirection() * size * 1.3)),
-            MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(acos(-1) / 4) * getDirection() * size * 1.3)),
-            MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(acos(-1) * 0.75) * getDirection() * size * 1.3)),
-            MathClasses::Vector3(pos + (MathClasses::Matrix3::MakeRotateZ(-acos(-1) * 0.75) * getDirection() * size * 1.3))
-        };
-
-        DrawLineEx({ corners[0].x, corners[0].y}, {corners[3].x, corners[3].y}, 8.f, DARKGREEN);
-        DrawLineEx({ corners[1].x, corners[1].y }, { corners[2].x, corners[2].y }, 8.f, DARKGREEN);
-        
-        turret.draw();
-    }
-};
-
-class Bullet {
+class Bullet : public GameObject {
 private:
     float size;
     float speed;
-    MathClasses::Vector3 pos;
     MathClasses::Vector3 vel;
 
 public:
     Bullet() {
         size = 5;
         speed = 5;
-        pos = { 0, 0, 1 };
-        vel = { 0, 0, 1 };
+        vel = { 0, 0, 0 };
     }
 
-    Bullet(MathClasses::Vector3 vel, MathClasses::Vector3 pos) {
+    Bullet(MathClasses::Vector3 pos, float rot) {
+        setPos(pos);
+        setRot(rot);
         size = 5;
         speed = 5;
-        this->pos = pos;
-        this->vel = vel;
+        vel = { 0, 0, 0 };
     }
 
     Bullet(const Bullet& copy) {
+        setPos(copy.getPos());
+        setRot(copy.getRot());
         size = copy.size;
         speed = copy.speed;
-        pos = copy.pos;
         vel = copy.vel;
     }
 
     Bullet& operator=(const Bullet& copy) {
+        setPos(copy.getPos());
+        setRot(copy.getRot());
         size = copy.size;
         speed = copy.speed;
-        pos = copy.pos;
         vel = copy.vel;
 
         return *this;
     }
 
-    const MathClasses::Vector3& getPos() {
-        return pos;
+    void bounce(float wallAngle) {
+        float newAngle = vel.Angle2D() - 2 * (vel.Angle2D() - wallAngle);
+
+        setRot(newAngle);
     }
 
     void reflectX() {
@@ -279,10 +93,12 @@ public:
     }
 
     void update() {
-        pos = pos + (vel * speed);
+        vel = getUnitDir() * speed;
+        move(vel);
     }
 
     void draw() {
+        MathClasses::Vector3 pos = getWorldPos();
         DrawCircle(pos.x, pos.y, size, BLACK);
     }
 };
@@ -299,14 +115,14 @@ public:
         pos = { 0, 0, 1 };
         width = 0;
         height = 0;
-        active = false;
+        active = true;
     }
 
     Brick(MathClasses::Vector3 pos, float width, float height) {
         this->pos = pos;
         this->width = width;
         this->height = height;
-        active = false;
+        active = true;
     }
 
     Brick(const Brick& copy) {
@@ -325,11 +141,27 @@ public:
         return *this;
     }
 
+    MathClasses::Vector3 getCentrePos() {
+        return { pos.x + (width / 2), pos.y + (height / 2), 1 };
+    }
+
+    void destroy() {
+        active = false;
+    }
+
     bool checkCollision(MathClasses::Vector3 bulletPos) {
+        if (!active) {
+            return false;
+        }
+
         return (bulletPos.x > pos.x && bulletPos.x < pos.x + width && bulletPos.y > pos.y && bulletPos.y < pos.y + height);
     }
     
     void draw() {
+        if (!active) {
+            return;
+        }
+
         DrawRectangleLines(pos.x, pos.y, width, height, BLACK);
     }
 };
@@ -338,6 +170,8 @@ class Game {
 private:
     int screenWidth;
     int screenHeight;
+
+    int score;
 
     Tank tank;
     int bulletCount;
@@ -355,28 +189,9 @@ public:
         screenWidth = 400;
         screenHeight = 400;
 
-        tank = Tank({ (float)screenWidth / 2, (float)screenHeight * 0.80f, 1 });
+        score = 0;
 
-        bulletCount = 0;
-        bullets = nullptr;
-
-        bricksWide = 20;
-        bricksTall = 20;
-
-        bricks = new Brick*[bricksTall];
-        for (int i = 0; i < bricksTall; i++) {
-            bricks[i] = new Brick[bricksWide];
-            for (int n = 0; n < bricksWide; n++) {
-                bricks[i][n] = Brick(MathClasses::Vector3(i * brickWidth, 0, 1), brickWidth, brickHeight);
-            }
-        }
-    }
-
-    Game(int screenWidth, int screenHeight) {
-        this->screenWidth = screenWidth;
-        this->screenHeight = screenHeight;
-
-        tank = Tank({ (float)screenWidth / 2, (float)screenHeight * 0.80f, 1 });
+        tank = Tank({ (float)screenWidth / 2, (float)screenHeight * 0.80f, 1 }, 0, 20);
 
         bulletCount = 0;
         bullets = nullptr;
@@ -388,7 +203,30 @@ public:
         for (int i = 0; i < bricksTall; i++) {
             bricks[i] = new Brick[bricksWide];
             for (int n = 0; n < bricksWide; n++) {
-                bricks[i][n] = Brick(MathClasses::Vector3(n * brickWidth, i * brickHeight, 1), brickWidth, brickHeight);
+                bricks[i][n] = Brick(MathClasses::Vector3(n * brickWidth, (i+1) * brickHeight, 1), brickWidth, brickHeight);
+            }
+        }
+    }
+
+    Game(int screenWidth, int screenHeight) {
+        this->screenWidth = screenWidth;
+        this->screenHeight = screenHeight;
+
+        score = 0;
+
+        tank = Tank({ (float)screenWidth / 2, (float)screenHeight * 0.80f, 1 }, 0, 20);
+
+        bulletCount = 0;
+        bullets = nullptr;
+
+        bricksWide = 20;
+        bricksTall = 20;
+
+        bricks = new Brick * [bricksTall];
+        for (int i = 0; i < bricksTall; i++) {
+            bricks[i] = new Brick[bricksWide];
+            for (int n = 0; n < bricksWide; n++) {
+                bricks[i][n] = Brick(MathClasses::Vector3(n * brickWidth, (i+2) * brickHeight, 1), brickWidth, brickHeight);
             }
         }
     }
@@ -403,13 +241,6 @@ public:
     }
 
     void processInputs() {
-        if (IsKeyDown(KEY_A)) {
-            tank.steer(-5 * (acos(-1) / 180));
-        }
-        if (IsKeyDown(KEY_D)) {
-            tank.steer(5 * (acos(-1) / 180));
-        }
-
         if (IsKeyDown(KEY_W)) {
             tank.setSpeed(4);
         }
@@ -419,12 +250,19 @@ public:
         else {
             tank.setSpeed(0);
         }
+        
+        if (IsKeyDown(KEY_A)) {
+            tank.steer(-5 * (acos(-1) / 180));
+        }
+        if (IsKeyDown(KEY_D)) {
+            tank.steer(5 * (acos(-1) / 180));
+        }
 
         if (IsKeyDown(KEY_Q)) {
-            tank.getTurret().rotate(-5 * (acos(-1) / 180));
+            tank.getTurret().turn(-5 * (acos(-1) / 180));
         }
         if (IsKeyDown(KEY_E)) {
-            tank.getTurret().rotate(5 * (acos(-1) / 180));
+            tank.getTurret().turn(5 * (acos(-1) / 180));
         }
 
         if (IsKeyPressed(KEY_SPACE)) {
@@ -432,7 +270,7 @@ public:
         }
     }
 
-    void spawnBullet(MathClasses::Vector3 vel, MathClasses::Vector3 pos) {
+    void spawnBullet(MathClasses::Vector3 pos, float rot) {
         Bullet* oldPtr = bullets;
 
         bulletCount++;
@@ -442,34 +280,96 @@ public:
         }
         delete[] oldPtr;
 
-        bullets[bulletCount - 1] = Bullet(vel, pos);
+        bullets[bulletCount - 1] = Bullet(pos, rot);
+    }
+
+    void despawnBullet(int index) {
+        Bullet* oldPtr = bullets;
+
+        bulletCount--;
+        bullets = new Bullet[bulletCount];
+        for (int i = 0, j = 0; i < bulletCount; i++, j++) {
+            if (j == index) {
+                j++;
+            }
+            
+            bullets[i] = oldPtr[j];
+        }
+        delete[] oldPtr;
     }
 
     void processCollisions() {
+        MathClasses::Vector3 tankPos = tank.getWorldPos();
+        MathClasses::Vector3 bulletPos;
+
+        int count = 0;
+        int* despawnQueue = nullptr;
+
         for (int i = 0; i < bulletCount; i++) {
-            if (bullets[i].getPos().x < 0 || bullets[i].getPos().x > screenWidth) {
-                bullets[i].reflectY();
+            bulletPos = bullets[i].getWorldPos();
+
+            if ((tankPos - bulletPos).Magnitude() < 20) {
+                int* oldPtr = despawnQueue;
+                count++;
+                despawnQueue = new int[count];
+                for (int i = 0; i < count - 1; i++) {
+                    despawnQueue[i] = oldPtr[i];
+                }
+                delete[] oldPtr;
+                despawnQueue[count - 1] = i;
+
+                tank.destroy();
             }
 
-            if (bullets[i].getPos().y < 0 || bullets[i].getPos().y > screenHeight) {
-                bullets[i].reflectX();
+            if (bulletPos.x < 0 || bulletPos.x > screenWidth) {
+                bullets[i].bounce(acos(-1) / 2);
+            }
+
+            if (bulletPos.y < 0) {
+                bullets[i].bounce(0);
+            }
+
+            if (bulletPos.y > screenHeight) {
+                int* oldPtr = despawnQueue;
+                count++;
+                despawnQueue = new int[count];
+                for (int i = 0; i < count - 1; i++) {
+                    despawnQueue[i] = oldPtr[i];
+                }
+                delete[] oldPtr;
+                despawnQueue[count - 1] = i;
             }
 
             for (int j = 0; j < bricksTall; j++) {
                 for (int n = 0; n < bricksWide; n++) {
-                    if (bricks[j][n].checkCollision(bullets[i].getPos())) {
-                        bullets[i].reflectX();
+                    if (bricks[j][n].checkCollision(bulletPos)) {
+                        bricks[j][n].destroy();
+                        score += 80;
+
+                        MathClasses::Vector3 v = bulletPos - bricks[j][n].getCentrePos();
+
+                        if (abs(v.y / v.x) < 1) {
+                            bullets[i].bounce(acos(-1) / 2);
+                        }
+                        else {
+                            bullets[i].bounce(0);
+                        }
                     }
                 }
             }
         }
+
+        for (int i = 0; i < count; i++) {
+            despawnBullet(despawnQueue[i]);
+        }
+        delete[] despawnQueue;
     }
 
     void update() {
         Turret& turret = tank.getTurret();
 
         if (turret.isFiring()) {
-            spawnBullet(turret.getDirection(), turret.getPos() + (turret.getDirection() * turret.getLength()));
+            spawnBullet(turret.getWorldPos() + (turret.getWorldUnitDir() * turret.getLength()), turret.getWorldRot());
         }
         
         processCollisions();
@@ -493,6 +393,10 @@ public:
         for (int i = 0; i < bulletCount; i++) {
             bullets[i].draw();
         }
+
+        DrawText(std::string("Score: " + std::to_string(score)).c_str(), 20, 10, 20, LIGHTGRAY);
+
+        DrawText(std::string("Bullets: " + std::to_string(bulletCount)).c_str(), 200, 10, 20, LIGHTGRAY);
     }
 };
 
